@@ -1,0 +1,93 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+
+# Load the dataset
+df = pd.read_csv('titanic.csv')  # Ensure the file is in the same directory or provide full path
+
+# ====================
+# 1. BASIC DATA INSPECTION
+# ====================
+print("\n=== Dataset Overview ===")
+print(f"Shape: {df.shape}")  # (rows, columns)
+print("\nFirst 5 rows:")
+print(df.head())
+
+print("\n=== Data Types & Missing Values ===")
+print(df.info())
+
+print("\n=== Summary Statistics ===")
+print(df.describe())
+
+print("\n=== Missing Values Count ===")
+print(df.isnull().sum())
+
+# ====================
+# 2. DATA CLEANING (OPTIONAL)
+# ====================
+# Handle missing values (example: fill Age with median)
+df['Age'].fillna(df['Age'].median(), inplace=True)
+
+# Drop unnecessary columns (optional)
+df.drop(['Cabin'], axis=1, inplace=True)  # Too many missing values
+
+# ====================
+# 3. VISUALIZATIONS
+# ====================
+# Set style for plots
+sns.set_style("whitegrid")
+plt.figure(figsize=(10, 6))
+
+# Histogram: Age distribution
+plt.subplot(2, 2, 1)
+sns.histplot(df['Age'], bins=20, kde=True)
+plt.title("Age Distribution")
+
+# Boxplot: Fare
+plt.subplot(2, 2, 2)
+sns.boxplot(y=df['Fare'])
+plt.title("Fare Distribution")
+
+# Survival count by Sex
+plt.subplot(2, 2, 3)
+sns.countplot(x='Survived', hue='Sex', data=df)
+plt.title("Survival by Gender")
+
+# Survival rate by Pclass
+plt.subplot(2, 2, 4)
+sns.barplot(x='Pclass', y='Survived', data=df)
+plt.title("Survival Rate by Class")
+
+plt.tight_layout()
+plt.savefig('visuals/eda_summary.png')  # Save the figure
+plt.show()
+
+# Pairplot (relationships between numerical features)
+sns.pairplot(df[['Age', 'Fare', 'Pclass', 'Survived']], hue='Survived')
+plt.savefig('visuals/pairplot.png')
+plt.show()
+
+# Correlation heatmap
+plt.figure(figsize=(10, 6))
+corr = df.corr()
+sns.heatmap(corr, annot=True, cmap='coolwarm')
+plt.title("Correlation Matrix")
+plt.savefig('visuals/correlation_heatmap.png')
+plt.show()
+
+# Interactive plot (using Plotly)
+fig = px.scatter(df, x='Age', y='Fare', color='Survived', 
+                 title="Age vs Fare (Survival Status)")
+fig.show()
+
+# ====================
+# 4. KEY INSIGHTS
+# ====================
+print("\n=== Key Insights ===")
+print(f"- Survival Rate: {df['Survived'].mean():.2%}")
+print(f"- Avg Fare for Survivors: ${df[df['Survived'] == 1]['Fare'].mean():.2f}")
+print(f"- Women's Survival Rate: {df[df['Sex'] == 'female']['Survived'].mean():.2%}")
+print(f"- Class 1 Survival Rate: {df[df['Pclass'] == 1]['Survived'].mean():.2%}")
